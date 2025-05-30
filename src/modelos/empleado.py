@@ -93,7 +93,7 @@ class Empleado:
 
     @id_ciudad.setter
     def id_ciudad(self, valor: int):
-        # TODO validar si el ID debe ser positivo, por ejemplo
+        # TODO validar si el ID debe ser positivo
         self._id_ciudad = valor
 
     @property

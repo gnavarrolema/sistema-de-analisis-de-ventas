@@ -6,7 +6,7 @@ class Producto:
     Representa un producto en el sistema.
     """
     def __init__(self, id_producto: int, nombre_producto: str, precio: Decimal, id_categoria: int,
-                 clase_producto: str | None = None, hora_modificacion: time | None = None, # Cambiado ModifyDate a hora_modificacion
+                 clase_producto: str | None = None, hora_modificacion: time | None = None,
                  resistente: str | None = None, es_alergenico: str | None = None, 
                  dias_vitalidad: int | None = None): # VitalityDays como int
         """
