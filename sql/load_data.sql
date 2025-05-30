@@ -5,6 +5,8 @@
 -- Opcional: Habilitar la carga de archivos locales.
 -- SET GLOBAL local_infile = 1; -- Ejecutar una vez en el servidor MySQL si es necesario.
 
+SET FOREIGN_KEY_CHECKS = 0;
+
 -- 1. Creación de la Base de Datos (si no existe)
 CREATE DATABASE IF NOT EXISTS sistema_de_analisis_de_ventas CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE sistema_de_analisis_de_ventas;
@@ -23,12 +25,12 @@ CREATE TABLE IF NOT EXISTS countries (
   UNIQUE INDEX CountryCode_UNIQUE (CountryCode ASC) VISIBLE
 ) ENGINE = InnoDB;
 
-LOAD DATA LOCAL INFILE 'D:\gnavarro\Escritorio\sistema-de-analisis-de-ventas\data\countries.csv'
+LOAD DATA LOCAL INFILE 'D:/gnavarro/Escritorio/sistema-de-analisis-de-ventas/data/countries.csv'
 INTO TABLE countries
 CHARACTER SET utf8mb4
 FIELDS TERMINATED BY ','
 OPTIONALLY ENCLOSED BY '"'
-LINES TERMINATED BY '\r\n' -- o '\r\n' para Windows
+LINES TERMINATED BY '\n' 
 IGNORE 1 ROWS
 (CountryID, CountryName, CountryCode);
 
@@ -51,7 +53,7 @@ CREATE TABLE IF NOT EXISTS cities (
     ON UPDATE CASCADE
 ) ENGINE = InnoDB;
 
-LOAD DATA LOCAL INFILE 'D:\gnavarro\Escritorio\sistema-de-analisis-de-ventas\data\cities.csv'
+LOAD DATA LOCAL INFILE 'D:/gnavarro/Escritorio/sistema-de-analisis-de-ventas/data/cities.csv'
 INTO TABLE cities
 CHARACTER SET utf8mb4
 FIELDS TERMINATED BY ','
@@ -72,12 +74,12 @@ CREATE TABLE IF NOT EXISTS categories (
   UNIQUE INDEX CategoryName_UNIQUE (CategoryName ASC) VISIBLE
 ) ENGINE = InnoDB;
 
-LOAD DATA LOCAL INFILE 'D:\gnavarro\Escritorio\sistema-de-analisis-de-ventas\data\categories.csv'
+LOAD DATA LOCAL INFILE 'D:/gnavarro/Escritorio/sistema-de-analisis-de-ventas/data/categories.csv'
 INTO TABLE categories
 CHARACTER SET utf8mb4
 FIELDS TERMINATED BY ','
 OPTIONALLY ENCLOSED BY '"'
-LINES TERMINATED BY '\r\n' -- o '\r\n' para Windows
+LINES TERMINATED BY '\n' 
 IGNORE 1 ROWS
 (CategoryID, CategoryName);
 
@@ -102,12 +104,12 @@ CREATE TABLE IF NOT EXISTS customers (
     ON UPDATE CASCADE
 ) ENGINE = InnoDB;
 
-LOAD DATA LOCAL INFILE 'D:\gnavarro\Escritorio\sistema-de-analisis-de-ventas\data\customers.csv'
+LOAD DATA LOCAL INFILE 'D:/gnavarro/Escritorio/sistema-de-analisis-de-ventas/data/customers.csv'
 INTO TABLE customers
 CHARACTER SET utf8mb4
 FIELDS TERMINATED BY ','
 OPTIONALLY ENCLOSED BY '"'
-LINES TERMINATED BY '\r\n' -- o '\r\n' para Windows
+LINES TERMINATED BY '\n' 
 IGNORE 1 ROWS
 (CustomerID, FirstName, MiddleInitial, LastName, CityID, Address);
 
@@ -134,12 +136,12 @@ CREATE TABLE IF NOT EXISTS employees (
     ON UPDATE CASCADE
 ) ENGINE = InnoDB;
 
-LOAD DATA LOCAL INFILE 'D:\gnavarro\Escritorio\sistema-de-analisis-de-ventas\data\employees.csv'
+LOAD DATA LOCAL INFILE 'D:/gnavarro/Escritorio/sistema-de-analisis-de-ventas/data/employees.csv'
 INTO TABLE employees
 CHARACTER SET utf8mb4
 FIELDS TERMINATED BY ','
 OPTIONALLY ENCLOSED BY '"'
-LINES TERMINATED BY '\r\n' -- o '\r\n' para Windows
+LINES TERMINATED BY '\n' 
 IGNORE 1 ROWS
 (EmployeeID, FirstName, MiddleInitial, LastName, @BirthDate, Gender, CityID, @HireDate)
 SET
@@ -157,10 +159,10 @@ CREATE TABLE IF NOT EXISTS products (
   Price DECIMAL(10,4) NOT NULL,
   CategoryID INT NOT NULL,
   Class VARCHAR(45) NULL,
-  ModifyDate VARCHAR(20) NULL, -- CAMBIADO DE DATE a VARCHAR para acomodar formato "21:49.2"
+  ModifyDate TIME NULL, 
   Resistant VARCHAR(45) NULL,
   IsAllergic VARCHAR(10) NULL,
-  VitalityDays INT NULL,
+  VitalityDays DECIMAL(3,0) NULL,
   PRIMARY KEY (ProductID),
   INDEX fk_products_categories_idx (CategoryID ASC) VISIBLE,
   CONSTRAINT fk_products_categories
@@ -170,14 +172,18 @@ CREATE TABLE IF NOT EXISTS products (
     ON UPDATE CASCADE
 ) ENGINE = InnoDB;
 
-LOAD DATA LOCAL INFILE 'D:\gnavarro\Escritorio\sistema-de-analisis-de-ventas\data\products.csv'
+LOAD DATA LOCAL INFILE 'D:/gnavarro/Escritorio/sistema-de-analisis-de-ventas/data/products.csv'
 INTO TABLE products
 CHARACTER SET utf8mb4
 FIELDS TERMINATED BY ','
 OPTIONALLY ENCLOSED BY '"'
-LINES TERMINATED BY '\r\n' -- o '\r\n' para Windows
+LINES TERMINATED BY '\r\n' 
 IGNORE 1 ROWS
-(ProductID, ProductName, Price, CategoryID, Class, ModifyDate, Resistant, IsAllergic, VitalityDays); -- ModifyDate se carga como texto
+(ProductID, ProductName, Price, CategoryID, Class, @ModifyDate_str, Resistant, IsAllergic, VitalityDays)
+SET ModifyDate = CASE
+                    WHEN @ModifyDate_str IS NULL OR @ModifyDate_str = '' THEN NULL
+                    ELSE TIME(CONCAT('00:', @ModifyDate_str)) -- Asume que @ModifyDate_str es MM:SS.s
+                 END;
 
 -- -----------------------------------------------------
 -- Tabla: sales
@@ -186,13 +192,13 @@ IGNORE 1 ROWS
 DROP TABLE IF EXISTS sales;
 CREATE TABLE IF NOT EXISTS sales (
   SalesID INT NOT NULL,
-  SalesPersonID INT NULL,       -- Asumiendo que puede ser NULL (ej. ventas online)
+  SalesPersonID INT NULL,
   ProductID INT NOT NULL,
   CustomerID INT NOT NULL,
   Quantity INT NOT NULL,
   Discount DECIMAL(10,2) NULL DEFAULT 0.00,
   TotalPrice DECIMAL(10,2) NOT NULL,
-  SalesDate VARCHAR(255) NULL,  -- CAMBIADO A VARCHAR debido a formato '31:24.2' en CSV. Necesita limpieza posterior.
+  SalesDate TIME NULL,  
   TransactionNumber VARCHAR(255) NULL,
   PRIMARY KEY (SalesID),
   INDEX fk_sales_employees_idx (SalesPersonID ASC) VISIBLE,
@@ -215,11 +221,17 @@ CREATE TABLE IF NOT EXISTS sales (
     ON UPDATE CASCADE
 ) ENGINE = InnoDB;
 
-LOAD DATA LOCAL INFILE 'D:\gnavarro\Escritorio\sistema-de-analisis-de-ventas\data\sales.csv'
+LOAD DATA LOCAL INFILE 'D:/gnavarro/Escritorio/sistema-de-analisis-de-ventas/data/sales.csv'
 INTO TABLE sales
 CHARACTER SET utf8mb4
 FIELDS TERMINATED BY ','
 OPTIONALLY ENCLOSED BY '"'
-LINES TERMINATED BY '\r\n' -- o '\r\n' para Windows
+LINES TERMINATED BY '\r\n' 
 IGNORE 1 ROWS
-(SalesID, SalesPersonID, ProductID, CustomerID, Quantity, Discount, TotalPrice, SalesDate, TransactionNumber);
+(SalesID, SalesPersonID, ProductID, CustomerID, Quantity, Discount, TotalPrice, @SalesDate_str, TransactionNumber)
+SET SalesDate = CASE
+                  WHEN @SalesDate_str IS NULL OR @SalesDate_str = '' THEN NULL
+                  ELSE TIME(CONCAT('00:', @SalesDate_str)) -- Asume que @SalesDate_str es MM:SS.s
+                END;
+
+SET FOREIGN_KEY_CHECKS = 1;
