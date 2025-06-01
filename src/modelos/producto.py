@@ -25,13 +25,13 @@ class Producto:
         """
         self._id_producto = id_producto
         self._nombre_producto = nombre_producto
-        self.precio = precio # Usar el setter directamente para validación
+        self.precio = precio 
         self._id_categoria = id_categoria
         self._clase_producto = clase_producto
         self._hora_modificacion = hora_modificacion
         self._resistente = resistente
         self._es_alergenico = es_alergenico
-        self.dias_vitalidad = dias_vitalidad # Usar el setter directamente
+        self.dias_vitalidad = dias_vitalidad
 
     @property
     def id_producto(self) -> int:
