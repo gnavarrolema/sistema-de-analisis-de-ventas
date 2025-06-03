@@ -11,3 +11,6 @@ data/*.csv
 
 # Logs
 logs/
+
+# Cache persistente
+cache/
