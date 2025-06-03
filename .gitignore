@@ -1,0 +1,10 @@
+# Entorno virtual
+.venv/
+venv/
+# Configuración/credenciales
+.env
+# Cachés y artefactos
+__pycache__/
+*.pyc
+# Data sensible/voluminosa
+data/*.csv
