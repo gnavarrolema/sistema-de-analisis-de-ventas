@@ -25,7 +25,7 @@ CREATE TABLE IF NOT EXISTS countries (
   UNIQUE INDEX CountryCode_UNIQUE (CountryCode ASC) VISIBLE
 ) ENGINE = InnoDB;
 
-LOAD DATA LOCAL INFILE 'D:/gnavarro/Escritorio/sistema-de-analisis-de-ventas/data/countries.csv'
+LOAD DATA INFILE 'countries.csv'
 INTO TABLE countries
 CHARACTER SET utf8mb4
 FIELDS TERMINATED BY ','
@@ -53,7 +53,7 @@ CREATE TABLE IF NOT EXISTS cities (
     ON UPDATE CASCADE
 ) ENGINE = InnoDB;
 
-LOAD DATA LOCAL INFILE 'D:/gnavarro/Escritorio/sistema-de-analisis-de-ventas/data/cities.csv'
+LOAD DATA INFILE 'cities.csv'
 INTO TABLE cities
 CHARACTER SET utf8mb4
 FIELDS TERMINATED BY ','
@@ -74,7 +74,7 @@ CREATE TABLE IF NOT EXISTS categories (
   UNIQUE INDEX CategoryName_UNIQUE (CategoryName ASC) VISIBLE
 ) ENGINE = InnoDB;
 
-LOAD DATA LOCAL INFILE 'D:/gnavarro/Escritorio/sistema-de-analisis-de-ventas/data/categories.csv'
+LOAD DATA INFILE 'categories.csv'
 INTO TABLE categories
 CHARACTER SET utf8mb4
 FIELDS TERMINATED BY ','
@@ -104,7 +104,7 @@ CREATE TABLE IF NOT EXISTS customers (
     ON UPDATE CASCADE
 ) ENGINE = InnoDB;
 
-LOAD DATA LOCAL INFILE 'D:/gnavarro/Escritorio/sistema-de-analisis-de-ventas/data/customers.csv'
+LOAD DATA INFILE 'customers.csv'
 INTO TABLE customers
 CHARACTER SET utf8mb4
 FIELDS TERMINATED BY ','
@@ -136,7 +136,7 @@ CREATE TABLE IF NOT EXISTS employees (
     ON UPDATE CASCADE
 ) ENGINE = InnoDB;
 
-LOAD DATA LOCAL INFILE 'D:/gnavarro/Escritorio/sistema-de-analisis-de-ventas/data/employees.csv'
+LOAD DATA INFILE 'employees.csv'
 INTO TABLE employees
 CHARACTER SET utf8mb4
 FIELDS TERMINATED BY ','
@@ -172,7 +172,7 @@ CREATE TABLE IF NOT EXISTS products (
     ON UPDATE CASCADE
 ) ENGINE = InnoDB;
 
-LOAD DATA LOCAL INFILE 'D:/gnavarro/Escritorio/sistema-de-analisis-de-ventas/data/products.csv'
+LOAD DATA INFILE 'products.csv'
 INTO TABLE products
 CHARACTER SET utf8mb4
 FIELDS TERMINATED BY ','
@@ -221,7 +221,7 @@ CREATE TABLE IF NOT EXISTS sales (
     ON UPDATE CASCADE
 ) ENGINE = InnoDB;
 
-LOAD DATA LOCAL INFILE 'D:/gnavarro/Escritorio/sistema-de-analisis-de-ventas/data/sales.csv'
+LOAD DATA INFILE 'sales.csv'
 INTO TABLE sales
 CHARACTER SET utf8mb4
 FIELDS TERMINATED BY ','
@@ -235,3 +235,40 @@ SET SalesDate = CASE
                 END;
 
 SET FOREIGN_KEY_CHECKS = 1;
+
+-- -----------------------------------------------------
+-- Validación de la carga de datos
+-- -----------------------------------------------------
+-- Desactivar las comprobaciones de claves foráneas para evitar errores al truncar tablas
+SET FOREIGN_KEY_CHECKS = 0;
+TRUNCATE TABLE sales;
+TRUNCATE TABLE products;
+TRUNCATE TABLE employees;
+TRUNCATE TABLE customers;
+TRUNCATE TABLE categories;
+TRUNCATE TABLE cities;
+TRUNCATE TABLE countries;
+SET FOREIGN_KEY_CHECKS = 1;
+-- -----------------------------------------------------
+
+-- Validación por conteo de filas en cada tabla
+
+SELECT 'Países (countries)' AS Tabla, COUNT(*) AS Filas FROM countries
+UNION ALL
+SELECT 'Ciudades (cities)', COUNT(*) FROM cities
+UNION ALL
+SELECT 'Categorías (categories)', COUNT(*) FROM categories
+UNION ALL
+SELECT 'Clientes (customers)', COUNT(*) FROM customers
+UNION ALL
+SELECT 'Empleados (employees)', COUNT(*) FROM employees
+UNION ALL
+SELECT 'Productos (products)', COUNT(*) FROM products
+UNION ALL
+SELECT 'Ventas (sales)', COUNT(*) FROM sales;
+
+-- Revisar la columna ModifyDate para algunos productos. Debido a que ModifyDate es TIME, se espera un formato de HH:MM:SS
+SELECT ProductID, ProductName, Price, ModifyDate FROM products WHERE ProductID IN (1, 2, 3, 4, 5);
+
+-- Revisar la columna SalesDate para algunas ventas. Debido a que SalesDate es TIME, se espera un formato de HH:MM:SS
+SELECT SalesID, ProductID, CustomerID, TotalPrice, SalesDate FROM sales WHERE SalesID IN (624877, 712592, 245650, 566614, 4176244);
