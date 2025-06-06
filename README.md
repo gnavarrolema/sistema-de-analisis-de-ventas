@@ -83,6 +83,20 @@ DB_PASSWORD=tu_contraseña_mysql
 
 ## Carga de Datos
 
+El proceso para poblar la base de datos se realiza en dos fases: una validación opcional pero recomendada de los archivos fuente, y la carga final a través de un script SQL.
+
+### Validación de Archivos CSV (Recomendado):
+
+Antes de cargar los datos, puedes verificar la integridad y el formato de los archivos CSV originales utilizando el script de validación provisto. Este script revisa que los tipos de datos sean correctos, que no falten valores requeridos y reporta cualquier inconsistencia en la consola.
+
+**Importante:** Este script no modifica los archivos originales, solo los lee y genera un informe.
+
+Para ejecutar el validador, abre una terminal en la raíz del proyecto y corre el siguiente comando:
+
+```bash
+python validar_csv.py
+```
+
 Para configurar la base de datos y cargar los datos iniciales, sigue estos pasos:
 
 1.  **Crear la Base de Datos**: Asegúrate de haber creado la base de datos como se indica en el archivo `.env`. El script SQL también incluye un comando para crearla si no existe: `CREATE DATABASE IF NOT EXISTS sistema_de_analisis_de_ventas;`.
