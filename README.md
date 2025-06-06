@@ -83,13 +83,29 @@ DB_PASSWORD=tu_contraseña_mysql
 
 ## Carga de Datos
 
-- **Archivos CSV**: Asegúrate de que los archivos CSV con los datos fuente estén ubicados en el directorio `data/`.
+Para configurar la base de datos y cargar los datos iniciales, sigue estos pasos:
 
-- **Script SQL**: El script `sql/load_data.sql` contiene las sentencias DDL para crear la estructura de la base de datos y las tablas, así como los comandos `LOAD DATA LOCAL INFILE` para cargar los datos desde los CSV.
+1.  **Crear la Base de Datos**: Asegúrate de haber creado la base de datos como se indica en el archivo `.env`. El script SQL también incluye un comando para crearla si no existe: `CREATE DATABASE IF NOT EXISTS sistema_de_analisis_de_ventas;`.
 
-- **Nota sobre LOAD DATA LOCAL INFILE**: Es posible que necesites habilitar la opción `local_infile` en tu servidor MySQL y/o en la configuración de la conexión. Revisa la documentación de MySQL si encuentras problemas. Asegúrate de que las rutas a los archivos CSV en `load_data.sql` sean correctas para tu entorno local donde ejecutas el script SQL.
+2.  **Identificar el Directorio Seguro de MySQL**: El comando `LOAD DATA INFILE` requiere que los archivos CSV estén en un directorio específico que MySQL considera seguro. Ejecuta la siguiente consulta en tu cliente de MySQL para averiguar cuál es esa carpeta:
 
-- **Ejecución**: Utiliza un cliente de MySQL, como MySQL Workbench, para conectarte a tu servidor y ejecutar el contenido de `sql/load_data.sql`. Esto creará la base de datos (si no existe), las tablas y las poblará con los datos.
+    ```sql
+    SHOW VARIABLES LIKE 'secure_file_priv';
+    ```
+
+    * La salida te mostrará una ruta (por ejemplo, `C:/ProgramData/MySQL/MySQL Server 8.0/Uploads/` en Windows o `/var/lib/mysql-files/` en Linux). Si la salida está vacía (NULL), la restricción podría estar desactivada, pero lo más común es que haya una ruta específica.
+
+3.  **Mover los Archivos CSV**: Mueve o copia todos los archivos `.csv` del directorio `data/` de este proyecto a la ruta que obtuviste en el paso anterior.
+
+4.  **Ejecutar el Script SQL**: Usando un cliente de MySQL (como MySQL Workbench o la terminal), conéctate a tu base de datos y ejecuta el contenido completo del script `sql/load_data.sql`.
+
+    * **¿Qué hace el script?**
+        * Crea la estructura de todas las tablas necesarias.
+        * Usa `TRUNCATE TABLE` para borrar cualquier dato existente, lo que permite que el script se pueda ejecutar varias veces sin errores de duplicados.
+        * Carga los datos desde los archivos CSV a las tablas correspondientes.
+        * Ejecuta consultas de validación al final para que puedas verificar que el número de filas en cada tabla sea el correcto.
+
+5.  **Nota sobre `local_infile`**: Este proyecto usa `LOAD DATA INFILE`, que lee archivos desde el servidor. Si en el futuro decides cambiar a `LOAD DATA LOCAL INFILE` (para leer archivos desde tu máquina cliente), necesitarás asegurarte de que tanto el servidor como el cliente de MySQL tengan la variable `local_infile` activada (`local_infile=1`).
 
 ## Uso del Sistema
 
